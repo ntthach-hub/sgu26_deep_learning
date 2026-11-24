@@ -1,0 +1,12 @@
+{
+  "example": "segnet",
+  "device": "cpu",
+  "seed": 2018,
+  "batch_size": 8,
+  "epochs": 3,
+  "train_samples": 128,
+  "evaluation_samples": 128,
+  "loss": "CrossEntropyLoss",
+  "learning_rate": 0.0001,
+  "torch": "2.14.0+cpu"
+}

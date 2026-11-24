@@ -1,0 +1,12 @@
+{
+  "example": "digit_sum",
+  "device": "cpu",
+  "seed": 2018,
+  "batch_size": 32,
+  "epochs": 5,
+  "train_samples": 512,
+  "evaluation_samples": 512,
+  "loss": "L1Loss",
+  "learning_rate": 0.01,
+  "torch": "2.14.0+cpu"
+}

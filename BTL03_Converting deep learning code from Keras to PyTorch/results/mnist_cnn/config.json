@@ -1,0 +1,12 @@
+{
+  "example": "mnist_cnn",
+  "device": "cpu",
+  "seed": 2018,
+  "batch_size": 128,
+  "epochs": 6,
+  "train_samples": 8192,
+  "evaluation_samples": 8192,
+  "loss": "CrossEntropyLoss",
+  "learning_rate": 0.01,
+  "torch": "2.14.0+cpu"
+}

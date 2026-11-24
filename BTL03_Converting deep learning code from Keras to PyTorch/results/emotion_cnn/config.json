@@ -1,0 +1,12 @@
+{
+  "example": "emotion_cnn",
+  "device": "cpu",
+  "seed": 2018,
+  "batch_size": 16,
+  "epochs": 3,
+  "train_samples": 384,
+  "evaluation_samples": 192,
+  "loss": "CrossEntropyLoss",
+  "learning_rate": 0.0001,
+  "torch": "2.14.0+cpu"
+}
