@@ -157,8 +157,8 @@ class Vehicles(ImageArchive):
         return transforms.PILToTensor()(image).float(), torch.tensor(self.labels[index])
 
 
-def vehicle_pair(seed):
-    data = Vehicles()
+def vehicle_pair(seed, archive=EXTRAS / "car_data.zip"):
+    data = Vehicles(archive)
     train, val = train_test_split(
         range(len(data)), test_size=0.3, random_state=seed, stratify=data.labels
     )

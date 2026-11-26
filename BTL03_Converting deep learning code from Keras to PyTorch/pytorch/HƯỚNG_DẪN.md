@@ -24,14 +24,14 @@ Chạy từng lệnh theo notebook cần đối chiếu.
 | `5. Others/1_segnet.ipynb` | `python pytorch/run.py segnet` |
 | `5. Others/2_obj_detection.ipynb` | `python pytorch/run.py vehicle` |
 
-`Iris_Bayesian_decision_making.ipynb` dùng scikit-learn và `colab_getting_started.ipynb` hướng dẫn Colab, đã có lệnh cài PyTorch. Hai notebook này dùng trực tiếp trong `examples`.
+`Iris_Bayesian_decision_making.ipynb` dùng scikit-learn và `colab_getting_started.ipynb` hướng dẫn Colab, đã có lệnh cài PyTorch. Có thể mở hai notebook này từ `examples.zip` của đề bài.
 
 ## Dữ liệu
 
 Git chỉ theo dõi `datasets/.gitkeep`. Sau khi clone, lấy dữ liệu theo các nguồn bên dưới và đặt vào `datasets/`.
 
 - MNIST dùng `datasets/mnist.npz` nếu có. Bộ dữ liệu của Yann LeCun và Corinna Cortes được phân phối dưới giấy phép CC BY-SA 3.0. PyTorch đọc bốn mảng trong bản MNIST do Keras phân phối. Khi thiếu tệp này, torchvision tự tải MNIST vào thư mục dữ liệu. [Nguồn MNIST và SHA-256](https://raw.githubusercontent.com/keras-team/keras/master/keras/src/datasets/mnist.py)
-- Để chạy lại SegNet và phát hiện xe, lấy `depth_hand.zip`, `car_data.zip` và `test.jpg` từ `examples.zip` của đề bài. Đặt cả ba tệp vào `examples/5. Others/` trong thư mục BTL03 và giữ hai tệp dữ liệu ở dạng ZIP. SegNet dùng `depth_hand.zip`. Ví dụ xe dùng `car_data.zip` để huấn luyện và `test.jpg` để tạo heatmap. Các nguồn ghi trong notebook gốc gồm [ảnh độ sâu bàn tay](https://drive.google.com/file/d/1MRiBnDW9dE7mNb5bL-jzhmtTd2CSklvL/view?usp=sharing) và [ảnh xe](https://drive.google.com/file/d/1rqitUFrFhB84tFVtg1Ad1TVz6coCWpNZ/view?usp=sharing).
+- Để chạy lại SegNet và phát hiện xe, lấy `depth_hand.zip`, `car_data.zip` và `test.jpg` từ `examples.zip` của đề bài. Giữ hai tệp dữ liệu ở dạng ZIP. Các lệnh trong bảng mặc định đọc từ `examples/5. Others/`. Khi lưu dữ liệu trong `datasets/`, thêm `--data datasets` vào lệnh. SegNet dùng `depth_hand.zip`. Ví dụ xe dùng `car_data.zip` để huấn luyện và `test.jpg` để tạo heatmap. Các nguồn ghi trong notebook gốc gồm [ảnh độ sâu bàn tay](https://drive.google.com/file/d/1MRiBnDW9dE7mNb5bL-jzhmtTd2CSklvL/view?usp=sharing) và [ảnh xe](https://drive.google.com/file/d/1rqitUFrFhB84tFVtg1Ad1TVz6coCWpNZ/view?usp=sharing).
 - Bốn ví dụ chân dung và FER2013 dùng các tệp dưới đây. Hai thư mục `datasets/wiki_quick` và `datasets/fer2013_quick` chứa mẫu được lấy từ dữ liệu gốc để tái lập các lượt chạy CPU trong báo cáo. Để chạy cả bộ, tải các tệp gốc và đặt trong `datasets` hoặc trỏ `--data` tới thư mục chứa chúng. [WIKI theo notebook](https://drive.google.com/drive/folders/0BxINLo5jshCRYW8xODhNSlkyLTQ?resourcekey=0-RNJvvSSE67Q1bMqQi3A1RQ&usp=sharing) · [FER2013 theo kho mã của tác giả](https://drive.google.com/drive/folders/15EozdYlGeO3d-ny8nbqFM3ojTGsj2hdE?usp=sharing)
 
 ```text
@@ -51,10 +51,12 @@ Mẫu WIKI lấy 128 ảnh đầu mỗi lớp từ tập train và 64 ảnh đ�
 ## Chạy nhanh và đọc kết quả
 
 ```powershell
-python pytorch/run.py mnist_cnn --epochs 2 --limit 512 --device cpu --out results_quick
-python pytorch/run.py gender_callbacks --data datasets/wiki_quick --epochs 9 --batch-size 16 --threads 2
-python pytorch/run.py emotion_augmentation --data datasets/fer2013_quick --epochs 3 --batch-size 16 --threads 3
-tensorboard --logdir results/gender_callbacks/tensorboard
+python pytorch/run.py mnist_cnn --epochs 2 --limit 512 --device cpu --out datasets/results_quick
+python pytorch/run.py gender_callbacks --data datasets/wiki_quick --epochs 9 --batch-size 16 --threads 2 --out datasets/results_quick
+python pytorch/run.py emotion_augmentation --data datasets/fer2013_quick --epochs 3 --batch-size 16 --threads 3 --out datasets/results_quick
+python pytorch/run.py segnet --data datasets --epochs 1 --limit 16 --out datasets/results_quick
+python pytorch/run.py vehicle --data datasets --epochs 1 --limit 32 --out datasets/results_quick
+tensorboard --logdir datasets/results_quick/gender_callbacks/tensorboard
 ```
 
 Các lệnh mặc định dùng cấu hình huấn luyện theo notebook gốc và tự chọn CUDA khi PyTorch phát hiện GPU. `--limit` lấy ngẫu nhiên tối đa số mẫu được chỉ định **trong mỗi tập** với seed cố định. Tập đánh giá đi theo notebook gốc. Khi tập này được dùng trong từng epoch hoặc để chọn checkpoint, nên gọi kết quả là chỉ số trên tập đánh giá.

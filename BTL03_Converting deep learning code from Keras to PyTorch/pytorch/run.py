@@ -36,7 +36,7 @@ def positive(value):
 def arguments():
     parser = argparse.ArgumentParser(description="Run a PyTorch example from BTL03.")
     parser.add_argument("example", choices=("environment", "gaussian", *TASKS))
-    parser.add_argument("--data", type=Path, default=data.ROOT / "datasets")
+    parser.add_argument("--data", type=Path, help="Directory containing the example's data files.")
     parser.add_argument("--out", type=Path, default=data.ROOT / "results")
     parser.add_argument("--device", choices=("auto", "cpu", "cuda"), default="auto")
     parser.add_argument("--epochs", type=positive, help="Epochs, or a cap per Gaussian sweep trial.")
@@ -58,8 +58,9 @@ def load_datasets(example, root, seed):
     if example.startswith("emotion_"):
         return data.emotion_pair(root, augment=example == "emotion_augmentation")
     if example == "segnet":
-        return data.HandDepth("train"), data.HandDepth("test")
-    return data.vehicle_pair(seed)
+        archive = root / "depth_hand.zip"
+        return data.HandDepth("train", archive), data.HandDepth("test", archive)
+    return data.vehicle_pair(seed, root / "car_data.zip")
 
 
 def main():
@@ -78,16 +79,22 @@ def main():
         return
 
     out = args.out / example
-    out.mkdir(parents=True, exist_ok=True)
     if example == "gaussian":
+        out.mkdir(parents=True, exist_ok=True)
         gaussian.run(out, device, args.seed, args.epochs)
         return
 
     builder, task, epochs, batch_size, lr = TASKS[example]
     epochs = args.epochs or epochs
     batch_size = args.batch_size or batch_size
+    default_root = data.EXTRAS if example in {"segnet", "vehicle"} else data.ROOT / "datasets"
+    root = args.data if args.data is not None else default_root
     try:
-        train, val = load_datasets(example, args.data, args.seed)
+        train, val = load_datasets(example, root, args.seed)
+        if task == "vehicle":
+            # Kiểm tra ảnh tạo heatmap trước khi bắt đầu huấn luyện.
+            with (root / "test.jpg").open("rb"):
+                pass
     except FileNotFoundError as error:
         missing_path = error.filename or str(error)
         raise SystemExit(f"Thiếu dữ liệu: {missing_path}. Xem pytorch/HƯỚNG_DẪN.md.") from error
@@ -110,13 +117,14 @@ def main():
     metadata = dict(example=example, device=str(device), seed=args.seed, batch_size=batch_size,
                     epochs=epochs, train_samples=train_count, evaluation_samples=val_count,
                     loss=criterion.__class__.__name__, learning_rate=lr, torch=torch.__version__)
+    out.mkdir(parents=True, exist_ok=True)
     (out / "config.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
     history = fit(model, loaders, criterion, optimizer, epochs, device, task, out,
                   patience=5 if callbacks or example == "emotion_augmentation" else None,
                   schedule=callbacks, tensorboard=callbacks)
     plot_history(history, out, criterion.__class__.__name__)
     if task == "vehicle":
-        previews.vehicle_heatmap(model, out / "prediction.png", device)
+        previews.vehicle_heatmap(model, out / "prediction.png", device, image_path=root / "test.jpg")
     else:
         names = data.GENDER_NAMES if example.startswith("gender_") else None
         if example.startswith("emotion_"):

@@ -73,8 +73,8 @@ def digit_features(model, dataset, device, out, cnn):
 
 
 @torch.inference_mode()
-def vehicle_heatmap(model, path, device, threshold=0.99):
-    with Image.open(EXTRAS / "test.jpg") as source:
+def vehicle_heatmap(model, path, device, threshold=0.99, image_path=EXTRAS / "test.jpg"):
+    with Image.open(image_path) as source:
         image = source.convert("RGB")
     tensor = pil_to_tensor(image).unsqueeze(0).float().to(device)
     heatmap = model(tensor)[0, 0].cpu().numpy()
